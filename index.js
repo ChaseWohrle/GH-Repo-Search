@@ -1,49 +1,32 @@
 'use strict';
 
-const apiKey = ;
-
-const searchURL = 'https://api.github.com/users/USERNAME/repos' ;
-
-
-function formatQueryParams(params) {
-  const queryItems = Object.keys(params)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-  return queryItems.join('&');
-}
-
 function displayResults(responseJson) {
   console.log(responseJson);
   $('#results-list').empty();
-  for (let i = 0; i < responseJson.value.length; i++){
+  let searchResults = responseJson.message;
+  for (let i = 0; i < responseJson.length; i++) {
     $('#results-list').append(
-      `<li><h3><a href="${responseJson.value[i].url}">${responseJson.value[i].title}</a></h3>
-      <p>${responseJson.value[i].description}</p>
-      <p>By ${responseJson.value[i].body}</p>
+      `<li><h3>${responseJson[i].name}</h3>
+      <p><a href="${responseJson[i].html_url}">${responseJson[i].html_url}</a></p>
       </li>`
     )};
-  $('#results').removeClass('hidden');
-};
-
-function getHandle(query) {
-  const params = {
-    q: query,
-  };
-  const queryString = formatQueryParams(params)
-  const url = searchURL + '?' + queryString;
-
-  console.log(url);
-
-  const options = {
-    headers: new Headers({
-      "x-rapidapi-key": apiKey})
+    $('#results').removeClass('hidden');
   };
 
-  fetch('https://api.github.com/repos/octocat/, options)
+
+/*
+responseJson.[i]name
+responseJson.[i]html_url
+*/
+
+
+function getRepos(username) {
+ console.log(username);
+ fetch(`https://api.github.com/users/${username}/repos`)
     .then(response => {
       if (response.ok) {
         return response.json();
       }
-      throw new Error(response.statusText);
     })
     .then(responseJson => displayResults(responseJson))
     .catch(err => {
@@ -51,12 +34,14 @@ function getHandle(query) {
     });
 }
 
+let searchResults ;
+let username  ;
 
 function watchForm() {
   $('form').submit(event => {
     event.preventDefault();
-    const userHandle = $('#js-search-term').val();
-    getHandle(userHandle);
+    const username = $('#js-search-term').val();
+    getRepos(username);
   });
 }
 
